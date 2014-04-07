@@ -57,3 +57,31 @@ morsecode = {
 	[" "] = {" / "},
 	["."] = {""},
 }
+
+shared = {}
+shared.index = shared 
+--[[
+	Translate string into international morsecode.
+	Unknown characters are given even spacing.
+--]]
+function shared:translate(message)
+	message = message:upper() -- easier than duplicating list twice for upper and lower case. 
+	local ns = ""	-- newstring
+	if #message ~= 0 then	-- redundancy 
+		for i = 1, #message do
+			-- Iterate through string. 
+			local c = message:sub(i,i):gsub("'" , "")
+			if morsecode[c] == nil then
+				-- Give it even spacing like morsecode table.
+				c = " "..c.." "	
+				ns = ns..c
+			else 
+				ns = ns..morsecode[c][1]
+			end
+		end
+		return ns
+	else
+		outputDebugString("(len ns) => "..tostring(#ns))
+		return false
+	end
+end

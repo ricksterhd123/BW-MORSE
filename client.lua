@@ -56,14 +56,16 @@ gui.button[3] = guiCreateButton(409, 349, 110, 32, "Translate", false, gui.windo
 guiSetVisible(gui.memo[1], false)
 guiSetFont(gui.memo[2], "default-bold-small")
 guiSetVisible(gui.window[1], false)
-guiMemoSetReadOnly(gui.memo[2],true) 
+guiMemoSetReadOnly(gui.memo[2],true)
+guiSetInputMode("no_binds_when_editing") 
 
 
-
+-- returns boolean depending on visibility of window[1]
 function gui:isOpen()
 	return guiGetVisible(self.window[1])
 end
 
+-- Toggles window open or closed.
 function gui:toggle()
 	local open = gui:isOpen()
 	guiSetVisible(self.window[1], not open)
@@ -75,18 +77,14 @@ addEventHandler("onClientGUIClick", gui.button[1],
 		gui:toggle()	-- Assuming that the gui is open when button is pressed, toggle the windows closed.
 	end, false)
 
-
+-- Retrieve translated morse code.
 function gui:retrieveMorse(morse)
 	if #morse ~= 0 or nil then
 		guiSetText(self.memo[2], morse)
 	end
 end
-addEvent("gui:retrieveMorse", true)
-addEventHandler("gui:retrieveMorse", getRootElement(),
-	function(morse)
-		gui:retrieveMorse(morse)
-	end)
 
+-- Get the text box 1
 function gui:getText()
 	if gui.toggled == false or nil then
 		return guiGetText(self.edit[1])
@@ -108,7 +106,9 @@ addEventHandler("onClientMouseLeave", gui.label[2],
 		guiLabelSetColor(gui.label[2], 235, 90, 33)
 	end,false)
 
-
+--[[
+	Handles the textbox choice: Multiline or singleline
+--]]
 addEventHandler("onClientGUIClick", gui.label[2], 
 	-- gui.toggled = false -> gui.edit[1] is visible
 	function ()
@@ -129,7 +129,7 @@ addEventHandler("onClientGUIClick", gui.label[2],
 
 addEventHandler("onClientGUIClick", gui.button[3],
 	function()
-		triggerServerEvent("server:translate", localPlayer,gui:getText() )
+		gui:retrieveMorse(shared:translate(gui:getText()))
 	end,false)
 
 addEventHandler("onClientCharacter", getRootElement(), 
@@ -138,17 +138,13 @@ addEventHandler("onClientCharacter", getRootElement(),
 			function()
 				local txt = gui:getText()
 				if gui:isOpen() and #txt ~= 0 then 
-					triggerServerEvent("server:translate", localPlayer,txt)
+					gui:retrieveMorse(shared:translate(gui:getText()))
 				end
 			end, 500, 2)
 
 	end)
 
-bindKey("F5", "down", 
-	function()
-		gui:toggle()
-	end)
-
+-- Use command instead and leave useful scripts binded.
 addCommandHandler("morse", 
 	function()
 		gui:toggle()
@@ -156,12 +152,10 @@ addCommandHandler("morse",
 
 addEventHandler("onClientGUIClick", gui.button[2], 
 	function()
-		triggerServerEvent("server:translate", localPlayer,gui:getText() )
+		gui:retrieveMorse(shared:translate(gui:getText()))
 		setTimer(
 			function()
 				local morse = guiGetText(gui.memo[2])
 				triggerServerEvent("server:output", localPlayer,morse)
 			end,500,1)
 	end,false)
-
-

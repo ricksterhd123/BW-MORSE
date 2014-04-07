@@ -40,7 +40,7 @@ function server:translate(message)
 	local ns = ""	-- newstring
 	if #message ~= 0 then	-- redundancy 
 		for i = 1, #message do
-			local c = message:sub(i,i)
+			local c = message:sub(i,i):gsub("'" , "")
 			if morsecode[c] == nil then
 				-- Give it even spacing like morsecode table.
 				c = " "..c.." "	
@@ -78,8 +78,12 @@ function translateChatToMorse(message, type, morse)
 	local r,g,b = getPlayerNametagColor(source)
 	if type == 0 and morse == false then
 		outputChatBox(getPlayerName(source)..": #ffffff"..server:translate(message),root, r,g,b, true)
-	elseif type == 0 then
-		outputChatBox(getPlayerName(source)..": #ffffff"..message,root, r,g,b, true)
+	elseif morse == true then
+		if #message < 121 then
+			outputChatBox(getPlayerName(source)..": #ffffff"..message,root, r,g,b, true)
+		else
+			outputChatBox("To many characters!", source, 255,0,0, false)
+		end
 	end
 end
 
@@ -87,7 +91,6 @@ addEvent("server:output", true)
 addEventHandler("server:output", getRootElement(), 
 	function(message)
 		if #message ~= 0 or nil then
-			local type, morse = 0, true
-			translateChatToMorse(message, type, morse)
+			translateChatToMorse(message, 0, true)
 		end
 	end)
